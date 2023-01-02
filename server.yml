@@ -33,7 +33,7 @@ Resources:
         Properties:
             GroupDescription: "Allow http to our load balancer"
             VpcId: 
-                Fn::ImportValue: !Sub "${EnvironmentName}-VPCID"
+              Fn::ImportValue: !Sub "${EnvironmentName}-VPCID"
             SecurityGroupIngress:
                 - IpProtocol: tcp
                   FromPort: 80
@@ -55,7 +55,7 @@ Resources:
         Properties:
             GroupDescription: Allow http to our hosts and SSH from local only
             VpcId: 
-                Fn::ImportValue: !Sub "${EnvironmentName}-VPCID"
+              Fn::ImportValue: !Sub "${EnvironmentName}-VPCID"
             SecurityGroupIngress:
                 - IpProtocol: tcp
                   FromPort: 80
@@ -77,7 +77,7 @@ Resources:
         Properties:
             GroupDescription: Allow ssh to our hosts and access to all ports
             VpcId: 
-                Fn::ImportValue: !Sub "${EnvironmentName}-VPCID"
+              Fn::ImportValue: !Sub "${EnvironmentName}-VPCID"
             SecurityGroupIngress:
                 - IpProtocol: tcp
                   FromPort: 22
@@ -103,7 +103,7 @@ Resources:
                 GroupSet:
                   - !Ref BastionHostSecGroup
                 SubnetId:
-                    Fn::ImportValue: !Sub "${EnvironmentName}-PUB1-SN"
+                  Fn::ImportValue: !Sub "${EnvironmentName}-PUB1-SN"
             BlockDeviceMappings:
               - DeviceName: "/dev/sdk"
                 Ebs:
@@ -232,7 +232,7 @@ Resources:
             Protocol: HTTP
             UnhealthyThresholdCount: 5
             VpcId: 
-                Fn::ImportValue: !Sub "${EnvironmentName}-VPCID"
+              Fn::ImportValue: !Sub "${EnvironmentName}-VPCID"
 
 
 Outputs: 
