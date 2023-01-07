@@ -89,7 +89,6 @@ Resources:
                   ToPort: 65535
                   CidrIp: 0.0.0.0/0
 
-
 # Bastion Host
     BastionHost:
         Type: AWS::EC2::Instance

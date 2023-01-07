@@ -5,9 +5,25 @@ Description: >
   The servers have a launch templates with an nginx server installed and listening on port 80
 
 Parameters:
-  EnvironmentName:
-    Description: An environment name that will be prefixed to resource names
-    Type: String
+
+    EnvironmentName:
+        Description: Environment name that will be prefixed to resource names
+        Type: String
+    
+    WebAppInstanceImageAMI:
+        Description: AMI of Instance
+        Type: String
+        Default: "ami-0574da719dca65348"
+    
+    WebAppInstanceType:
+        Description: Instance Type for web application
+        Type: String
+        Default: "t2.micro"
+
+    BastionHostInstanceType:
+        Description: Instance Type for jump host
+        Type: String
+        Default: "t2.micro"
 
 Resources:
   # For the Loadbalancer Security Group
@@ -54,31 +70,100 @@ Resources:
           ToPort: 65535
           CidrIp: 0.0.0.0/0
 
-  # The launch configuration settings to use with the auto scaling group
-  WebAppLaunchConfig:
-    Type: AWS::AutoScaling::LaunchConfiguration
+    # Bastion Host Security Group
+  BastionHostSecGroup:
+    Type: AWS::EC2::SecurityGroup
     Properties:
-      UserData:
-        Fn::Base64: !Sub |
-          #!/bin/bash
-          sudo apt-get update -y
-          sudo apt-get install nginx -y
-          sudo apt install net-tools -y
-          sudo systemctl start nginx.service
-          sudo systemctl enable nginx.service
-          host=$(hostname)
-          ip=$(ifconfig | grep 'inet ' | grep -v '127.0.0.1' | cut -c 7-17)
-          sudo chown -R $USER:$USER /var/www
-          echo '<h1> Host name / IP address for this server is '$host'</h1>' > /var/www/html/index.nginx-debian.html
-      ImageId: "ami-0574da719dca65348"
-      KeyName: ayomide-altschool
-      SecurityGroups:
-        - Ref: WebServerSecGroup
-      InstanceType: "t2.micro"
+      GroupDescription: Allow ssh to our hosts and access to all ports
+      VpcId: 
+        Fn::ImportValue: !Sub "${EnvironmentName}-VPCID"
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+        - IpProtocol: tcp
+          FromPort: 0
+          ToPort: 65535
+          CidrIp: 0.0.0.0/0
+
+# Bastion Host
+  BastionHost:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Ref WebAppInstanceImageAMI
+      KeyName: royalboe-bastion
+      InstanceType: !Ref BastionHostInstanceType
+      NetworkInterfaces:
+        - DeviceIndex: "0"
+          AssociatePublicIpAddress: true
+          GroupSet:
+            - !Ref BastionHostSecGroup
+          SubnetId:
+            Fn::ImportValue: !Sub "${EnvironmentName}-PUB1-SN"
       BlockDeviceMappings:
         - DeviceName: "/dev/sdk"
           Ebs:
             VolumeSize: 10
+
+
+  # The launch configuration settings to use with the auto scaling group
+  # WebAppLaunchConfig:
+  #   Type: AWS::AutoScaling::LaunchConfiguration
+  #   Properties:
+  #     UserData:
+  #       Fn::Base64: !Sub |
+  #         #!/bin/bash
+  #         sudo apt-get update -y
+  #         sudo apt-get install nginx -y
+  #         sudo apt install net-tools -y
+  #         sudo systemctl start nginx.service
+  #         sudo systemctl enable nginx.service
+  #         host=$(hostname)
+  #         ip=$(ifconfig | grep 'inet ' | grep -v '127.0.0.1' | cut -c 7-17)
+  #         sudo chown -R $USER:$USER /var/www
+  #         echo '<h1> Host name / IP address for this server is '$host'</h1>' > /var/www/html/index.nginx-debian.html
+  #     ImageId: "ami-0574da719dca65348"
+  #     KeyName: ayomide-altschool
+  #     SecurityGroups:
+  #       - Ref: WebServerSecGroup
+  #     InstanceType: "t2.micro"
+  #     BlockDeviceMappings:
+  #       - DeviceName: "/dev/sdk"
+  #         Ebs:
+  #           VolumeSize: 10
+
+  # The launch configuration settings to use with the auto scaling group
+  WebAppLaunchTemplate:
+    Type: AWS::EC2::LaunchTemplate
+    Properties:  
+        LaunchTemplateData:
+            UserData:
+                Fn::Base64: !Sub |
+                    #!/bin/bash
+                    sudo apt-get update -y
+                    sudo apt-get install apache2 -y
+                    sudo apt install net-tools -y
+                    apt-get install unzip awscli -y
+                    sudo systemctl start apache2.service
+                    sudo systemctl enable apache2.service
+                    sudo chown -R $USER:$USER /var/www
+                    cd /var/www/html
+                    aws s3 cp s3://udacity-demo-1/udacity.zip .
+                    unzip -o udacity.zip
+            ImageId: !Ref WebAppInstanceImageAMI
+            KeyName: ayomide-altschool
+            IamInstanceProfile:
+              Arn: !ImportValue ayomideProfileInstance
+            SecurityGroupIds: 
+                - !Ref WebServerSecGroup
+            InstanceType: !Ref WebAppInstanceType
+            BlockDeviceMappings:
+                - DeviceName: "/dev/sdk"
+                  Ebs:
+                    VolumeSize: 10
+
 
   # Autoscaling group for ec2 instances
   WebAppGroup:
@@ -86,8 +171,9 @@ Resources:
     Properties:
       VPCZoneIdentifier:
         - Fn::ImportValue: !Sub "${EnvironmentName}-PRIV-NETS"
-      LaunchConfigurationName:
-        Ref: WebAppLaunchConfig
+      LaunchTemplate:
+        LaunchTemplateId: !Ref WebAppLaunchTemplate
+        Version: !GetAtt WebAppLaunchTemplate.LatestVersionNumber
       DesiredCapacity: "2"
       MinSize: "2"
       MaxSize: "4"

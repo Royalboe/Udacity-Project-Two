@@ -53,6 +53,6 @@ Resources:
 Outputs:
     ProfileInstance:
         Description: A role for EC2
-        Value: !Ref ProfileInstance
+        Value: !GetAtt ProfileInstance.Arn
         Export:
-            Name: !Sub ${EnvironmentName}-ProfileInstance
+            Name: ayomideProfileInstance
