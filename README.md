@@ -35,4 +35,4 @@ The parameter file for the server.yml
 
 ### Link To My WebApp
 
-[link](http://royal-webap-cbwpoby3xhnt-1420877299.us-east-1.elb.amazonaws.com/)
+[Udagram Web App](http://royal-webap-cbwpoby3xhnt-1420877299.us-east-1.elb.amazonaws.com/)
