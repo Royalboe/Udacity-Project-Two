@@ -25,3 +25,10 @@ This file contains the code to set up the server infrastructure, it also gives t
 ## server-parameter.yml
 
 The parameter file for the server.yml
+
+### How To use
+
+- To use, run the network.yml first, followed by the role.yml and the server.yml
+- `create.sh stack-name template-file parameter-file`
+- `update.sh stack-name template-file parameter-file`
+- `delete.sh stack-name`
