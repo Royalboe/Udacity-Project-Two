@@ -1,5 +1,5 @@
 Description: >
-  Ayomide Johnson Salami / Altschool Student
+  Ayomide Johnson Salami / Software engineer
   This template deploys an auto scaling group of min four servers in 2 private subnets, 
   with an application loadbalancer to distribute traffic between the servers. It also creates
   a bastion host that lets admin access the private servers.
@@ -71,7 +71,7 @@ Resources:
           ToPort: 65535
           CidrIp: 0.0.0.0/0
 
-    # Bastion Host Security Group
+  # Bastion Host Security Group
   BastionHostSecGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
