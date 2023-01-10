@@ -44,7 +44,7 @@ Parameters:
         Default: 10.0.3.0/24
 
 Resources:
-    # logical application network for servers to be created
+    # logical application network for servers to be created : outputs VPC id
     VPC: 
         Type: AWS::EC2::VPC
         Properties:
@@ -81,7 +81,7 @@ Resources:
                 - Key: Name 
                   Value: !Sub ${EnvironmentName} Public Subnet (AZ1)
 
-# Public Subnet 1 
+# Public Subnet 2 
     PublicSubnet2: 
         Type: AWS::EC2::Subnet
         Properties:
@@ -163,14 +163,14 @@ Resources:
             DestinationCidrBlock: 0.0.0.0/0
             GatewayId: !Ref InternetGateway
 
-# Publice route assosiation
+# Public route assosiation
     PublicSubnet1RouteTableAssociation:
         Type: AWS::EC2::SubnetRouteTableAssociation
         Properties:
             RouteTableId: !Ref PublicRouteTable
             SubnetId: !Ref PublicSubnet1
 
-# Publice route assosiation
+# Public route assosiation
     PublicSubnet2RouteTableAssociation:
         Type: AWS::EC2::SubnetRouteTableAssociation
         Properties:
