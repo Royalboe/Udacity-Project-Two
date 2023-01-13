@@ -31,8 +31,5 @@ The parameter file for the server.yml
 - To use, run the network.yml first, followed by the role.yml and the server.yml
 - `create.sh stack-name template-file parameter-file`
 - `update.sh stack-name template-file parameter-file`
-- `delete.sh stack-name`
+- `delete.sh stack-nam
 
-### Link To My WebApp
-
-[Udagram Web App](http://royal-webap-cbwpoby3xhnt-1420877299.us-east-1.elb.amazonaws.com/)
